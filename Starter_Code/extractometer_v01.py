@@ -22,7 +22,7 @@ fo_s1on = 'samp1_on'
 fo_s1off = 'samp1_off'
 
 scan_cnt = {'samp0_on':0, 'samp0_off':0, 'samp1_on':0, 'samp1_off':0}
-scan_headers = 'Card_Type|Travel_Date|TouchOnOff_DateTime|Unknown1|Unknown2|Unknown3|Unknown4|Unknown5|Unknown6\r\n'
+scan_headers = 'Mode|BusinessDate|DateTime|CardID|CardType|ParentRoute|VehicleID|RouteID|StopID\r\n'
 
 threads = []
 
