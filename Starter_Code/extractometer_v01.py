@@ -27,7 +27,7 @@ scan_headers = 'Card_Type|Travel_Date|TouchOnOff_DateTime|Unknown1|Unknown2|Unkn
 threads = []
 
 
-# In[35]:
+# In[40]:
 
 def scan_create(root,f,f_scan):
     global scan_cnt
@@ -42,7 +42,7 @@ def scan_create(root,f,f_scan):
     scan_cnt[f_scan] = scan_cnt[f_scan] + 1
 
 
-# In[39]:
+# In[ ]:
 
 def main():
     counter = 0
@@ -74,7 +74,11 @@ if __name__ == "__main__":
     main() # need this for threading I believe
 
 
-# In[10]:
+# ### NOTE:
+# #### The below import command may be exceedingly slow as loading all into memory
+# 
+
+# In[ ]:
 
 import pandas as pd
 df = pd.read_csv(os.path.join(WKDIR,fo_s0off), sep='|')
