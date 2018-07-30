@@ -11,7 +11,7 @@ import sys
 
 # In[constants]:
 
-WKDIR = 'C:\\Users\\Admin\\Documents\\MelbDatathon2018'
+WKDIR = "e:\\Documents\\GitHub\\_melbdatathon"
 os.chdir(WKDIR)
 
 files_out = {
@@ -55,7 +55,7 @@ def scan_create(root,f,scan_tp):
     if temp_cnt == 5:
         for k in files_out.keys():
             with open(os.path.join(WKDIR,files_out[mode_tp]), 'ab') as f_out:
-                f_out.write(''.join(scan_cache[mode_tp]))
+                f_out.write(b''.join(scan_cache[mode_tp]))
                 scan_cache[mode_tp] = []
         temp_cnt = 0
 
