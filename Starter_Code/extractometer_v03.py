@@ -24,40 +24,40 @@ files_out = {
         ,'OthOn':'On_Other'
         ,'OthOff':'Off_Other'
         }
-scan_cnt = {
-        '1On':0
-        ,'1Off':0
-        ,'2On':0
-        ,'2Off':0
-        ,'3On':0
-        ,'3Off':0
-        ,'OthOn':0
-        ,'OthOff':0
+scan_cache = {
+        '1On':[]
+        ,'1Off':[]
+        ,'2On':[]
+        ,'2Off':[]
+        ,'3On':[]
+        ,'3Off':[]
+        ,'OthOn':[]
+        ,'OthOff':[]
         }
 scan_headers = 'Mode|BusinessDate|DateTime|CardID|CardType|ParentRoute|VehicleID|RouteID|StopID' + os.linesep
 
 threads = []
-
-# In[file setup]:
-# Make the placeholder files
-for v in files_out.values():
-    with open(os.path.join(WKDIR,v), 'wb') as f_out:
-        f_out.write(scan_headers.encode())
+temp_cnt = 0
 
 # In[file scan def]:
 def scan_create(root,f,scan_tp):
-    global scan_cnt
+    global temp_cnt
     print(f)
     with gzip.open(os.path.join(root,f), 'rb') as f_in:
         for line in f_in.readlines():
-            mode = line.decode().split(sep='|')[0]
+            mode = line.decode().split('|')[0]
             if mode in ('1','2','3'):
                 mode_tp = mode + scan_tp
             else: # mode not in 1 or 2 or 3
                 mode_tp = 'Oth' + scan_tp
+            scan_cache[mode_tp].append(line)
+    temp_cnt += 1
+    if temp_cnt == 5:
+        for k in files_out.keys():
             with open(os.path.join(WKDIR,files_out[mode_tp]), 'ab') as f_out:
-                f_out.write(line)
-            scan_cnt[mode_tp] = scan_cnt[mode_tp] + 1
+                f_out.write(''.join(scan_cache[mode_tp]))
+                scan_cache[mode_tp] = []
+        temp_cnt = 0
 
 # In[main]:
 def main():
@@ -74,9 +74,13 @@ def main():
             thr.join()
 
 if __name__ == "__main__":
-    global scan_cnt # initialise
-    for k in scan_cnt.keys():
-        scan_cnt[k] = 0
+    global scan_cache # initialise
+    for k in scan_cache.keys():
+        scan_cache[k] = []
+    # Make the placeholder files
+    for v in files_out.values():
+        with open(os.path.join(WKDIR,v), 'wb') as f_out:
+            f_out.write(scan_headers.encode())
 
     main() # need this for threading I believe
 
