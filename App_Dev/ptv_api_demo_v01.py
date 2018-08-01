@@ -26,8 +26,12 @@ import urllib
 import json, datetime
 
 
-DEVELOPER_ID    = "3000035"
-API_KEY         = "3aefee2c-4cbc-4d39-88df-fa0cc91b93fe"
+import pandas as pd
+
+df = pd.read_csv('e:\\Documents\\GitHub\\PTV_API_KEY.txt')
+
+DEVELOPER_ID    = df['DEVELOPER_ID'][0]
+API_KEY         = df['API_KEY'][0]
 
 
 def nownomicro():
