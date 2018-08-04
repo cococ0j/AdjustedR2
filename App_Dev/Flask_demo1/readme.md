@@ -7,9 +7,9 @@ https://developer.okta.com/blog/2018/07/12/flask-tutorial-simple-user-registrati
 Present real time statistics on train service "fullness", with predictions for fullness upon arrival at favourite station
 
 ## Requirements
-* python*=3.5
-* pip install Flask*=1.0.0
-* pip install flask-oidc*=1.4.0
+* python>=3.5
+* pip install Flask>=1.0.0
+* pip install flask-oidc>=1.4.0
 * pip install okta==0.0.4
 
 ## Ideas
