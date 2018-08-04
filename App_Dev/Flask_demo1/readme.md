@@ -15,6 +15,7 @@ Present real time statistics on train service "fullness", with predictions for f
 ## Ideas
 * [BootstrapCDN](https://getbootstrap.com/docs/4.1/getting-started/introduction/) for CSS (formating) and common DOM actions
 * Python Flask as the web app framework
+* AWS Cloud storage / Elastic Jack and the Beanstalk
 * Python visualisation with one / number of the following:
 1. [Carto*frames*](https://carto.com/blog/inside/CARTOframes-python-interface-CARTO/)
 2. [Amcharts](https://www.amcharts.com/demos/animations-along-lines/?theme=none)
@@ -22,7 +23,6 @@ Present real time statistics on train service "fullness", with predictions for f
 4. [Bokeh](https://bokeh.pydata.org/en/latest/)
 5. [MPLd3](https://mpld3.github.io/)
 6. [Charts.js](https://www.chartjs.org/)
-7. AWS Cloud storage / Elastic Jack and the Beanstalk
 
 ---
 
