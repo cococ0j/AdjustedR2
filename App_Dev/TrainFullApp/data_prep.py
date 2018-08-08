@@ -14,8 +14,8 @@ WKDIR       = "e:\\Documents\\GitHub\\_gtfs\\test_data"
 
 os.chdir(WKDIR)
 for i,f in enumerate(os.scandir(WKDIR)):    
-    fnm_base = os.path.splitext(f.name)[0]
-    if fnm_base.endswith('.txt'):
+    fnm_base, ext = os.path.splitext(f.name)[0],os.path.splitext(f.name)[1]
+    if ext == '.txt':
         exec("df_{} = pd.read_csv('{}')".format(fnm_base,f.name))
 
 #kudos: https://stackoverflow.com/questions/17116814/pandas-how-do-i-split-text-in-a-column-into-multiple-rows#answer-21032532    
@@ -31,7 +31,7 @@ df_tram = pd.merge(df_tram_shapes, df_tram_routes, how='inner', left_on='shape_i
 
 # ===== Save dataframes / compress ===== #
 
-store = pd.HDFStore('ptv_routes.h5')
+store = pd.HDFStore('ptv_route_2018.h5')
 
 # save to HDF5
 store['df_bus']     = df_bus
@@ -40,6 +40,24 @@ store['df_tram']    = df_tram
 
 store.info()
 store.items()
+
+
+# ===== Convert some SVG to PNG ===== #
+
+# https://exceptionshub.com/convert-svg-to-png-in-python.html
+
+import wand.image as wi
+
+IMGDIR       = "e:\\Documents\\GitHub\\AdjustedR2\\App_Dev\\TrainFullApp\\static\\img\\PTV"
+for i,f in enumerate(os.scandir(IMGDIR)):    
+    fnm_base, ext = os.path.splitext(f.name)[0],os.path.splitext(f.name)[1]
+    fnm_svg = fnm_base + ext
+    fnm_png = fnm_base + '.png'
+    if ext == '.svg':
+        with wi.Image(filename=os.path.join(IMGDIR,fnm_svg), format="svg") as image:
+            png_image = image.make_blob("png")
+        with open(os.path.join(IMGDIR,fnm_png), "wb") as out:
+            out.write(png_image)        
 
 # ===== Load and Iterate all routes in dataset, one at a time ===== #
 
