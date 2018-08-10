@@ -12,10 +12,23 @@ Created on Sat Aug  4 14:44:24 2018
 from flask import Flask, render_template, g, redirect, url_for
 from pathlib import Path
 import os
+import sys
+import pandas as pd
 
-ROOT        = Path(__file__).parents[3]
-F_SECRET    = 'flask_secret_key.txt'
-F_GGL       = 'Google_API_Key.txt'
+CWD             = 'e:\\Documents\\GitHub\\AdjustedR2\\App_Dev\\TrainFullApp'
+sys.path.append(CWD)
+sys.path
+
+from dash_data import *
+
+# ROOT        = Path(__file__).parents[3]
+try:
+    ROOT        = pathlib.Path('e:\Documents\GitHub')
+except NameError:
+    ROOT        = 'e:\\Documents\\GitHub'
+
+F_SECRET        = 'flask_secret_key.txt'
+F_GGL           = 'Google_API_Key.txt'
 
 ## ----- LOAD KEYS ----- ##
 #''.join(random.choices(string.ascii_uppercase + string.digits, k=100))
@@ -32,51 +45,61 @@ with open(os.path.join(ROOT,F_GGL),'r') as f_in:
 
 FLASK_SECRET_KEY    = secret_key
 
+GOOGLE_KEY          = ggl_key
+
+## ----- LOAD DATA ----- ##
+def load_data_chk():
+    PTV_FILE     = 'e:\\Documents\\GitHub\\_gtfs\\test_data\\ptv_route_2018.h5'
+    store = pd.HDFStore(PTV_FILE)
+    df_bus     = store['df_bus']
+    df_train   = store['df_train']
+    df_tram    = store['df_tram']
+    
+    return df_bus, df_train, df_tram
 
 ## ----- BOKEH MAP ----- ##
 
-from bokeh.models import ColumnDataSource, GMapOptions
-from bokeh.plotting import gmap
-from bokeh.embed import components
+def bokeh_magic():
 
-#map_options = GMapOptions(lat=30.2861, lng=-97.7394, map_type="roadmap", zoom=11)
-#p = gmap(ggl_key, map_options, title="Austin")
-#source = ColumnDataSource(
-#    data=dict(lat=[ 30.29,  30.20,  30.29],
-#              lon=[-97.70, -97.74, -97.78])
-#    )
-#p.circle(x="lon", y="lat", size=15, fill_color="blue", fill_alpha=0.8, source=source)
+    from bokeh.models import ColumnDataSource, GMapOptions
+    from bokeh.plotting import gmap
+    from bokeh.embed import components
+    
+    #map_options = GMapOptions(lat=30.2861, lng=-97.7394, map_type="roadmap", zoom=11)
+    #p = gmap(ggl_key, map_options, title="Austin")
+    #source = ColumnDataSource(
+    #    data=dict(lat=[ 30.29,  30.20,  30.29],
+    #              lon=[-97.70, -97.74, -97.78])
+    #    )
+    #p.circle(x="lon", y="lat", size=15, fill_color="blue", fill_alpha=0.8, source=source)
+    
 
-import pandas as pd
-import os
-WKDIR       = "e:\\Documents\\GitHub\\_gtfs\\test_data"
-os.chdir(WKDIR)
-   
-store = pd.HDFStore(os.path.join(WKDIR,'ptv_route_2018.h5'))
-df_train   = store['df_train']
+    df_bus, df_train, df_tram = load_data_chk()
 
-route_test = df_train.loc[(df_train.shape_id == '2-SDM-E-mjp-1.1.H') | (df_train.shape_id == '2-SDM-E-mjp-1.1.R')][['shape_pt_lat','shape_pt_lon']]
-route_test = route_test.to_dict('list')
+    route_test = df_train.loc[(df_train.shape_id == '2-SDM-E-mjp-1.1.H') | (df_train.shape_id == '2-SDM-E-mjp-1.1.R')][['shape_pt_lat','shape_pt_lon']]
+    route_test = route_test.to_dict('list')
+    
+    LAT_INIT = route_test['shape_pt_lat'][0]
+    LON_INIT = route_test['shape_pt_lon'][0]
+    
+    map_options = GMapOptions(lat=LAT_INIT, lng=LON_INIT, map_type="roadmap", zoom=11)
+    p = gmap(GOOGLE_KEY, map_options, title="PTV_Sandringham_Line")
+    source = ColumnDataSource(
+        data=route_test
+        )
+    
+    p.line(x="shape_pt_lon", y="shape_pt_lat", line_width=2, line_color="blue", line_alpha=0.8, line_cap='round', source=source)
+    
+    #            'e:\\Documents\\GitHub\\AdjustedR2\\App_Dev\\TrainFullApp\\static\\img\\PTV\\train.png'
+    p.image_url(url=['https://bokeh.pydata.org/en/latest/_static/images/logo.png']
+                ,x=LON_INIT, y=LAT_INIT, w=24, h=24)
+    
+    p.circle(x=LON_INIT, y=LAT_INIT, size=10, fill_color='blue', fill_alpha=0.8)
+    
+    ## Embed plot into HTML via Flask Render
+    script, div = components(p)
 
-LAT_INIT = route_test['shape_pt_lat'][0]
-LON_INIT = route_test['shape_pt_lon'][0]
-
-map_options = GMapOptions(lat=LAT_INIT, lng=LON_INIT, map_type="roadmap", zoom=11)
-p = gmap(ggl_key, map_options, title="PTV_Sandringham_Line")
-source = ColumnDataSource(
-    data=route_test
-    )
-
-p.line(x="shape_pt_lon", y="shape_pt_lat", line_width=2, line_color="blue", line_alpha=0.8, line_cap='round', source=source)
-
-#            'e:\\Documents\\GitHub\\AdjustedR2\\App_Dev\\TrainFullApp\\static\\img\\PTV\\train.png'
-p.image_url(url=['https://bokeh.pydata.org/en/latest/_static/images/logo.png']
-            ,x=LON_INIT, y=LAT_INIT, w=24, h=24)
-
-p.circle(x=LON_INIT, y=LAT_INIT, size=10, fill_color='blue', fill_alpha=0.8)
-
-## Embed plot into HTML via Flask Render
-script, div = components(p)
+    return script, div
 
 ## ----- APP CONFIGURATION ----- ##
 
@@ -103,6 +126,8 @@ def index():
 @app.route("/dashboard")
 #@oidc.require_login
 def dashboard(): 
+    script, div = bokeh_magic()
+    
     return render_template("dashboard.html", script=script, div=div)
 
 
