@@ -23,7 +23,7 @@ from dash_data import *
 
 # ROOT        = Path(__file__).parents[3]
 try:
-    ROOT        = pathlib.Path('e:\Documents\GitHub')
+    ROOT        = Path('e:\Documents\GitHub')
 except NameError:
     ROOT        = 'e:\\Documents\\GitHub'
 
@@ -41,11 +41,17 @@ with open(os.path.join(ROOT,F_SECRET),'r') as f_in:
 with open(os.path.join(ROOT,F_GGL),'r') as f_in:
     ggl_key = f_in.readline()
 
-## ----- CONSTANTS ----- ##
+## ----- LOAD TRAIN STATIONS ----- ##
+ds = pd.read_csv(os.path.join(CWD,'data','train_stations.csv'))
 
+## ----- CONSTANTS ----- ##
 FLASK_SECRET_KEY    = secret_key
 
 GOOGLE_KEY          = ggl_key
+
+STATIONS            = ds.values[:,0]
+LETTERS             = ds.values[:,1]
+
 
 ## ----- LOAD DATA ----- ##
 def load_data_chk():
@@ -120,7 +126,7 @@ app.config["SECRET_KEY"] = FLASK_SECRET_KEY
 @app.route("/")
 @app.route("/index")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", stations=STATIONS)
 
 
 @app.route("/dashboard")

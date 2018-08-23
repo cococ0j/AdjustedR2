@@ -5,8 +5,21 @@
 {% block page %}Dashboard{% endblock %}
 
 {% block body %}
-  <div class="mdl-grid demo-content">
-    {{ script|safe }}
-    {{ div|safe }}
+ <div class="mdl-grid page-content">
+    <div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--6-col mdl-cell--8-col-tablet mdl-cell--4-col-phone">
+      <div class="mdl-card__title">
+        <h2 class="mdl-card__title-text">A Bokeh Plot</h2>
+      </div>
+      <div class="mdl-card__media">
+        {{ script|safe }}
+        {{ div|safe }}        
+      </div>
+      <div class="mdl-card__supporting-text">
+        This demonstrates a line being drawn between some points.  Hey, it's a start...
+      </div>
+      <div class="mdl-card__actions mdl-card--border">
+        <a id="add_nuke" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Get Started</a>
+      </div>
+    </div>
   </div>
 {% endblock %}
