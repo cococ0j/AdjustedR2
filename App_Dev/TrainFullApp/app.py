@@ -44,13 +44,19 @@ with open(os.path.join(ROOT,F_GGL),'r') as f_in:
 ## ----- LOAD TRAIN STATIONS ----- ##
 ds = pd.read_csv(os.path.join(CWD,'data','train_stations.csv'))
 
+station_dict = dict()
+for word in sorted(ds.stop_name):
+#    word = word[:10]
+    f = word[0]
+    if f in station_dict.keys():
+        station_dict[f].append(word)
+    else:
+        station_dict[f] = [word]
+
+
 ## ----- CONSTANTS ----- ##
 FLASK_SECRET_KEY    = secret_key
-
 GOOGLE_KEY          = ggl_key
-
-STATIONS            = ds.values[:,0]
-LETTERS             = ds.values[:,1]
 
 
 ## ----- LOAD DATA ----- ##
@@ -126,7 +132,7 @@ app.config["SECRET_KEY"] = FLASK_SECRET_KEY
 @app.route("/")
 @app.route("/index")
 def index():
-    return render_template("index.html", stations=STATIONS)
+    return render_template("index.html", station_dict=station_dict)
 
 
 @app.route("/dashboard")

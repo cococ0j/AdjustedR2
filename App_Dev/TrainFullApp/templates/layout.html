@@ -136,52 +136,22 @@
     <button id="add_nuke_plus" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--colored mdl-js-ripple-effect">
       <i class="material-icons">add</i>
     </button>
+    
     <ul class='mdl-menu mdl-js-menu mdl-js-ripple-effect mdl-menu--top-right' for="add_nuke_plus">
-      <li id="A_Stations" class="mdl-menu__item"><span class="mdl-menu__item">A Stations<i class="material-icons mdl-menu__item-icon">chevron_right</i></span></li>    
-    </ul>
-  
-    <ul class="mdl-menu mdl-js-menu mdl-js-ripple-effect mdl-menu--top-right" for="A_Stations">
-          <li class="mdl-menu__item"><span class="mdl-menu__item"><i class="material-icons mdl-menu__item-icon">train</i>station 1</span></li>
-          <li class="mdl-menu__item"><span class="mdl-menu__item"><i class="material-icons mdl-menu__item-icon">train</i>station 2</span></li>
-          <li class="mdl-menu__item"><span class="mdl-menu__item"><i class="material-icons mdl-menu__item-icon">train</i>station 3</span></li>
-    </ul>  
- 
-    
-    
-    <!--
-    <select class="mdl-menu mdl-js-menu mdl-js-ripple-effect mdl-menu--top-right" for="A_Stations">
-      <option class="mdl-menu__item">About</option>
-      <option class="mdl-menu__item">Contact</option>
-      <option class="mdl-menu__item">Legal information</option>
-    </select>
-    
-   <ul class="mdl-menu mdl-list mdl-js-menu mdl-js-ripple-effect mdl-menu--top-right mdl-list" for="A_Stations">
-      <label class="mdl-list__item mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-1">
-        <input type="radio" id="option-1" class="mdl-radio__button" name="options" value="1" checked>
-        <span class="mdl-radio__label">station 1</span>
-      </label>
-      <label class="mdl-list__item mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-2">
-        <input type="radio" id="option-2" class="mdl-radio__button" name="options" value="2">
-        <span class="mdl-radio__label">station 2</span>
-      </label>
-    </ul>
-
-    <ul class="mdl-menu mdl-js-menu mdl-js-ripple-effect mdl-menu--top-right" for="add_nuke_plus">
-            <li class="mdl-menu__item">About</li>
-            <li class="mdl-menu__item">Contact</li>
-            <li class="mdl-menu__item">Legal information</li>
-    </ul>
-    -->
-
-    <!--
-    <select>
-    {% for station in stations %}
-        <option value="{{ user.id }}">{{ station }}</option>
+    {% for key in station_dict.keys() %}    
+      <li id="{{ key }}_Stations" class="mdl-menu__item"><span class="mdl-menu__item">{{ key }} Stations<i class="material-icons mdl-menu__item-icon">chevron_right</i></span></li>    
     {% endfor %}
-    </select>
-    -->
+    </ul>       
+    {% for key, values in station_dict.items() %}    
+      <ul class="mdl-menu mdl-js-menu mdl-js-ripple-effect mdl-menu--top-right" for="{{ key }}_Stations">
+        {% for value in values %}
+        <li class="mdl-menu__item"><span class="mdl-menu__item"><i class="material-icons mdl-menu__item-icon">train</i>{{ value }}</span></li>
+        {% endfor %}
+      </ul>  
+    {% endfor %}
     
     <script>
+    // Dialog box handling
     var dialog = document.querySelector('dialog');
     var showModalButton = document.querySelector('.show-modal');
     if (! dialog.showModal) {
@@ -196,6 +166,11 @@
     dialog.querySelector('.reject').addEventListener('click', function() {
       dialog.close();
       window.location.replace("http://www.datasciencemelbourne.com/datathon");
+    });
+    // When user clicks "get started" simulate + button click
+    document.getElementById("add_nuke").addEventListener("click", function(event) {
+    event.preventDefault();
+    document.getElementById("add_nuke_plus").click();
     });
     </script>
     
