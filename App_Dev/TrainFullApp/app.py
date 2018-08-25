@@ -19,7 +19,7 @@ CWD             = 'e:\\Documents\\GitHub\\AdjustedR2\\App_Dev\\TrainFullApp'
 sys.path.append(CWD)
 sys.path
 
-from dash_data import *
+#from dash_data import *
 
 # ROOT        = Path(__file__).parents[3]
 try:
@@ -140,7 +140,7 @@ def index():
 def dashboard(): 
     script, div = bokeh_magic()
     
-    return render_template("dashboard.html", script=script, div=div)
+    return render_template("dashboard.html", script=script, div=div, station_dict=station_dict)
 
 
 @app.route("/login")
