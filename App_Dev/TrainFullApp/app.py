@@ -69,13 +69,21 @@ def load_data_chk():
     
     return df_bus, df_train, df_tram
 
+df_bus, df_train, df_tram = load_data_chk()
+
 ## ----- BOKEH MAP ----- ##
 
 def bokeh_magic():
 
-    from bokeh.models import ColumnDataSource, GMapOptions
+    from bokeh.models import ColumnDataSource, GMapOptions, HoverTool
     from bokeh.plotting import gmap
     from bokeh.embed import components
+    
+    # Load JSON Gmap style, 
+    # https://snazzymaps.com/style/72543/assassins-creed-iv
+    # https://snazzymaps.com/style/27725/minimal-v3
+    style = open('.\static\json\gmap_style_minv3.json','r').read()
+    
     
     #map_options = GMapOptions(lat=30.2861, lng=-97.7394, map_type="roadmap", zoom=11)
     #p = gmap(ggl_key, map_options, title="Austin")
@@ -86,19 +94,29 @@ def bokeh_magic():
     #p.circle(x="lon", y="lat", size=15, fill_color="blue", fill_alpha=0.8, source=source)
     
 
-    df_bus, df_train, df_tram = load_data_chk()
+#    df_bus, df_train, df_tram = load_data_chk()
 
-    route_test = df_train.loc[(df_train.shape_id == '2-SDM-E-mjp-1.1.H') | (df_train.shape_id == '2-SDM-E-mjp-1.1.R')][['shape_pt_lat','shape_pt_lon']]
+    route_test = df_train.loc[(df_train.shape_id == '2-SDM-E-mjp-1.1.H') | (df_train.shape_id == '2-SDM-E-mjp-1.1.R')][['shape_pt_lat','shape_pt_lon','shape_id','shape_dist_traveled']]
     route_test = route_test.to_dict('list')
     
     LAT_INIT = route_test['shape_pt_lat'][0]
     LON_INIT = route_test['shape_pt_lon'][0]
     
-    map_options = GMapOptions(lat=LAT_INIT, lng=LON_INIT, map_type="roadmap", zoom=11)
-    p = gmap(GOOGLE_KEY, map_options, title="PTV_Sandringham_Line")
     source = ColumnDataSource(
         data=route_test
         )
+    
+    hover_tooltips = [
+            ("Route ID", "@shape_id"),
+            ("Sequence", "$index"),
+            ("Lon,Lat", "@shape_pt_lon, @shape_pt_lat"),
+            ("Distance (m)","@shape_dist_traveled{0,0.0}"),
+    ]        
+    
+    map_options = GMapOptions(lat=LAT_INIT, lng=LON_INIT, map_type="roadmap", zoom=11, scale_control=True, styles=style)
+    p = gmap(GOOGLE_KEY, map_options, title="PTV_Sandringham_Line", sizing_mode="scale_width"
+             ,tools="pan,wheel_zoom,reset,help,box_zoom,tap,zoom_in,zoom_out,save")
+#             ,tooltips=hover_tooltips)
     
     p.line(x="shape_pt_lon", y="shape_pt_lat", line_width=2, line_color="blue", line_alpha=0.8, line_cap='round', source=source)
     
@@ -107,6 +125,8 @@ def bokeh_magic():
                 ,x=LON_INIT, y=LAT_INIT, w=24, h=24)
     
     p.circle(x=LON_INIT, y=LAT_INIT, size=10, fill_color='blue', fill_alpha=0.8)
+    
+    p.add_tools(HoverTool(tooltips=hover_tooltips, mode='mouse'))
     
     ## Embed plot into HTML via Flask Render
     script, div = components(p)
