@@ -9,23 +9,10 @@ Created on Sun Sep  9 11:39:03 2018
 
 """
 TO DO:
-==>This is to find stops in the CBD
-Step 1: create CBD square box (get the log and lat for the 4 points)
-Step2: find out the stops id within the CBD fringe
-
-==>Find route going to city through myki  (A)
-Step1: filter the myki data based on cbd stop flag
-Step2: group by touch on stop id and group by route id
-
-==>Find nearest stop to the closed stop (B)
-Step1: find nearest stop based on geo location
-
-==>Map A& B, to find out the nearest stop that going to CBD
-==>Then calculate the historical volume of these route
-==>Volume after nude the stop  , allocate to the nearest stop
-
+> Add statistical plots for data from the final table
+>     
 Final table:
-> Stop id (n
+> Stop id (nbr)
 > Average current volume
 > % increase volume
 > Distance
@@ -36,6 +23,7 @@ Final table:
 
 import os
 import pandas as pd
+import numpy as np
 from bokeh.models import ColumnDataSource, GMapOptions, HoverTool
 from bokeh.plotting import gmap
 from bokeh.embed import components
@@ -86,7 +74,7 @@ def bokeh_magic(df_bus, df_train, df_tram):
     #    )
     #p.circle(x="lon", y="lat", size=15, fill_color="blue", fill_alpha=0.8, source=source)
       
-    hover_tooltips = [
+    HOVER_TOOLTIPS = [
             ("Index", "$index"),
             ("Route", "@route_long_name"),
             ("Stop ID", "@stop_id"),
@@ -99,27 +87,66 @@ def bokeh_magic(df_bus, df_train, df_tram):
     LAT_INIT = -37.818
     LON_INIT = 144.967
     
-    map_options = GMapOptions(lat=LAT_INIT, lng=LON_INIT, map_type="roadmap", zoom=10, scale_control=True, styles=style)
-    p = gmap(GOOGLE_KEY, map_options, title="PTV Network Map", sizing_mode="scale_width"
+    MAP_OPTIONS = GMapOptions(lat=LAT_INIT, lng=LON_INIT, map_type="roadmap", zoom=10, scale_control=True, styles=style)
+    p = gmap(GOOGLE_KEY, MAP_OPTIONS, title="PTV Network Map", sizing_mode="scale_width"
              ,tools="pan,wheel_zoom,reset,help,box_zoom,tap,zoom_in,zoom_out,save")
 #             ,tooltips=hover_tooltips)
 
-    p.add_tools(HoverTool(tooltips=hover_tooltips, mode='mouse'))
+#    p.add_tools(HoverTool(tooltips=HOVER_TOOLTIPS, mode='mouse'))
     
-    ## ~~~~~ TRAIN EXAMPLE ~~~~~ ##
+    TOOLTIPS = """
+    <div>
+        <div>
+            <img
+                src="@img" height="10" alt="@img" width="10"
+                style="float: left; margin: 5px 2px 5px 2px;"
+                border="0"
+            ></img>
+        </div>
+        <div>
+            <span style="font-size: 12px; font-weight: bold; color: #2F4F4F;">@stop_name</span>
+        </div>
+        <div>
+            <span style="font-size: 12px; color: #006400;">Stop # [@stop_sequence]</span>
+        </div>
+        <div>
+            <span style="font-size: 10px; font-weight: italic; color: #2F4F4F;">@route_long_name</span>
+        </div>
+        <div>
+            <span style="font-size: 12px; color: #2F4F4F;">Geo-coords:</span>
+            <span style="font-size: 10px; color: #006400;">(@stop_lat, @stop_lon)</span>
+        </div>
+        <div>
+            <span style="font-size: 12px; color: #2F4F4F;">Journey (km):</span>
+            <span style="font-size: 10px; color: #006400;">@dist_km</span>
+        </div>
+    </div>
+    """
+
+    p.add_tools(HoverTool(tooltips=TOOLTIPS, mode='mouse'))
+
+    
+    ## ~~~~~ RANDOM EXAMPLE ~~~~~ ##
     
 #    route_test = df_train.loc[(df_train.route_id == '2-SDM-B-mjp-1') | (df_train.route_id == '2-SDM-B-mjp-1')]
 #    route_test = route_test.to_dict('list')
     
-    for i, route in enumerate(set(df_train.route_id)):
-        droute = df_train.loc[(df_train.route_id == route)]
+    for mode, df in zip(['train','tram','bus'],[df_train,df_tram,df_bus]):       
+        df['img'] = './static/img/PTV/{}.png'.format(mode)
+        df['dist_km'] = np.around(df.shape_dist_traveled / 1000,2)
     
+    import random
+    dt_choice, COLOUR_CHOICE = random.choice([(df_train,RCOLOUR_TRAIN),(df_tram,RCOLOUR_TRAM),(df_bus,RCOLOUR_BUS)])
+        
+    for i, route in enumerate(set(dt_choice.route_id)):
+        droute = dt_choice.loc[(dt_choice.route_id == route)]
+ 
         source = ColumnDataSource(
             data=droute
             )
         
-        p.line(x="stop_lon", y="stop_lat", line_width=2, line_color=RCOLOUR_TRAIN, line_alpha=0.8, line_cap='round', source=source)
-        p.circle(x="stop_lon", y="stop_lat", size=5, fill_color=RCOLOUR_TRAIN, fill_alpha=0.6, source=source)
+        p.line(x="stop_lon", y="stop_lat", line_width=2, line_color=COLOUR_CHOICE, line_alpha=0.8, line_cap='round', source=source)
+        p.circle(x="stop_lon", y="stop_lat", size=5, fill_color=COLOUR_CHOICE, fill_alpha=0.6, line_alpha=0.2, source=source)
     
     #            'e:\\Documents\\GitHub\\AdjustedR2\\App_Dev\\TrainFullApp\\static\\img\\PTV\\train.png'
 #    p.image_url(url=['https://bokeh.pydata.org/en/latest/_static/images/logo.png'],x=LON_INIT, y=LAT_INIT, w=24, h=24)  
