@@ -50,7 +50,7 @@ def load_data_chk():
     """
     Loads data frames of route data from the h5 store created by gtf_data_prep.py
     """
-    store = pd.HDFStore('.\data\ptv_stops_2018.h5')
+    store = pd.HDFStore('./data/ptv_stops_2018.h5')
     df_bus     = store['df_bus']
     df_train   = store['df_train']
     df_tram    = store['df_tram']
@@ -59,21 +59,17 @@ def load_data_chk():
 
 
 ## ----- BOKEH MAP ----- ##
-def bokeh_magic(df_bus, df_train, df_tram):
-    
+def bokeh_magic(df_bus, df_train, df_tram, mode=None, station=None):
+          
+    if not mode: # This is where we do the station processing - otherwise, we show default maps
+        return None,None
+        
     # Load JSON Gmap style, 
     # https://snazzymaps.com/style/72543/assassins-creed-iv
     # https://snazzymaps.com/style/27725/minimal-v3
-    style = open('.\static\json\gmap_style_minv3.json','r').read()   
+    style = open('./static/json/gmap_style_minv3.json','r').read()   
     
-    #map_options = GMapOptions(lat=30.2861, lng=-97.7394, map_type="roadmap", zoom=11)
-    #p = gmap(ggl_key, map_options, title="Austin")
-    #source = ColumnDataSource(
-    #    data=dict(lat=[ 30.29,  30.20,  30.29],
-    #              lon=[-97.70, -97.74, -97.78])
-    #    )
-    #p.circle(x="lon", y="lat", size=15, fill_color="blue", fill_alpha=0.8, source=source)
-      
+     
     HOVER_TOOLTIPS = [
             ("Index", "$index"),
             ("Route", "@route_long_name"),
@@ -131,12 +127,14 @@ def bokeh_magic(df_bus, df_train, df_tram):
 #    route_test = df_train.loc[(df_train.route_id == '2-SDM-B-mjp-1') | (df_train.route_id == '2-SDM-B-mjp-1')]
 #    route_test = route_test.to_dict('list')
     
-    for mode, df in zip(['train','tram','bus'],[df_train,df_tram,df_bus]):       
-        df['img'] = './static/img/PTV/{}.png'.format(mode)
+    for modetp, df in zip(['train','tram','bus'],[df_train,df_tram,df_bus]):       
+        df['img'] = './static/img/PTV/{}.png'.format(modetp)
         df['dist_km'] = np.around(df.shape_dist_traveled / 1000,2)
+
+    # Create DataFrame & Color Dict by mode
+    mode_dict =  {'train': (df_train,RCOLOUR_TRAIN), 'tram': (df_tram,RCOLOUR_TRAM), 'bus': (df_bus,RCOLOUR_BUS)}
     
-    import random
-    dt_choice, COLOUR_CHOICE = random.choice([(df_train,RCOLOUR_TRAIN),(df_tram,RCOLOUR_TRAM),(df_bus,RCOLOUR_BUS)])
+    dt_choice, COLOUR_CHOICE = mode_dict[mode]
         
     for i, route in enumerate(set(dt_choice.route_id)):
         droute = dt_choice.loc[(dt_choice.route_id == route)]

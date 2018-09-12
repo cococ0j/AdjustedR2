@@ -87,9 +87,9 @@
         <nav class="demo-navigation mdl-navigation mdl-color--blue-grey-900">
           <a class="mdl-navigation__link" href="/"><i class="mdl-color-text--blue-grey-100 material-icons" role="presentation">home</i>Home</a>
           <a class="mdl-navigation__link" href="/dashboard"><i class="mdl-color-text--blue-grey-100 material-icons" role="presentation">dashboard</i>Dashboard</a>
-          <a class="mdl-navigation__link" href="/"><i class="mdl-color-text--blue-grey-100 material-icons" role="presentation">train</i>Train Plan</a>
-          <a class="mdl-navigation__link" href="/"><i class="mdl-color-text--blue-grey-100 material-icons" role="presentation">tram</i>Tram Plan</a>
-          <a class="mdl-navigation__link" href="/"><i class="mdl-color-text--blue-grey-100 material-icons" role="presentation">directions_bus</i>Bus Plan</a>
+          <a class="mdl-navigation__link" href="/dashboard?mode=train"><i class="mdl-color-text--blue-grey-100 material-icons" role="presentation">train</i>Train Map</a>
+          <a class="mdl-navigation__link" href="/dashboard?mode=tram"><i class="mdl-color-text--blue-grey-100 material-icons" role="presentation">tram</i>Tram Map</a>
+          <a class="mdl-navigation__link" href="/dashboard?mode=bus"><i class="mdl-color-text--blue-grey-100 material-icons" role="presentation">directions_bus</i>Bus Map</a>
           <a class="mdl-navigation__link" href="/"><i class="mdl-color-text--blue-grey-100 material-icons" role="presentation">traffic</i>Network Plan</a>
           <a class="mdl-navigation__link" href="/"><i class="mdl-color-text--blue-grey-100 material-icons" role="presentation">map</i>Nearby Services</a>
           <a class="mdl-navigation__link" href="/"><i class="mdl-color-text--blue-grey-100 material-icons" role="presentation">notifications</i>Upcoming Rides</a>
@@ -144,7 +144,7 @@
     {% endfor %}
     </ul>       
     {% for key, values in station_dict.items() %}    
-      <ul id="{{ key }}_StationList" class="mdl-menu mdl-js-menu mdl-js-ripple-effect mdl-menu--top-right" for="{{ key }}_Stations">
+      <ul id="{{ key }}_StationList" class="mdl-menu mdl-js-menu mdl-js-ripple-effect mdl-menu--bottom-right" for="{{ key }}_Stations">
         {% for value in values %}
         <li class="mdl-menu__item"><span class="mdl-menu__item"><i class="material-icons mdl-menu__item-icon">train</i>{{ value }}</span></li>
         {% endfor %}
