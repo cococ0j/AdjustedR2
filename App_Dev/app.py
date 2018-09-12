@@ -9,7 +9,7 @@ Created on Sat Aug  4 14:44:24 2018
 
 ## ----- IMPORTS ----- ##
 
-from flask import Flask, render_template, g, redirect, url_for, request
+from flask import Flask, render_template, g, redirect, url_for, request, redirect
 import flask_sijax
 from pathlib import Path
 import os
@@ -88,15 +88,22 @@ def index():
     return render_template("index.html", station_dict=station_dict)
 
 
-@app.route("/dashboard", methods=['GET', 'POST'])
+@app.route("/dashboard", methods=['GET','POST'])
 #@oidc.require_login
-def dashboard(): 
+def dashboard():    
+#    if request.method == 'POST':       
+#    elif request.method == "GET":
+    if request.args.get('mode') or request.args.get('station'):
+        mode = request.args.get('mode', type = str)
+        station = request.args.get('station', type = str)
+        plot_title = mode if mode else station
+        
+        script, div = bokeh_magic(df_bus, df_train, df_tram, mode, station)
     
-    mode = request.args.get('mode', type = str)   
-    script, div = bokeh_magic(df_bus, df_train, df_tram, mode)
-    
-    return render_template("dashboard.html", script=script, div=div, station_dict=station_dict)
+        return render_template("dashboard.html", script=script, div=div, station_dict=station_dict, plot_title=plot_title)
 
+    else:
+        return redirect(url_for(".index"))
 
 @app.route("/login")
 #@oidc.require_login

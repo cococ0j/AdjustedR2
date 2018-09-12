@@ -146,7 +146,7 @@
     {% for key, values in station_dict.items() %}    
       <ul id="{{ key }}_StationList" class="mdl-menu mdl-js-menu mdl-js-ripple-effect mdl-menu--bottom-right" for="{{ key }}_Stations">
         {% for value in values %}
-        <li class="mdl-menu__item"><span class="mdl-menu__item"><i class="material-icons mdl-menu__item-icon">train</i>{{ value }}</span></li>
+        <li class="mdl-menu__item"><a href="/dashboard?station={{ value }}"><span class="mdl-menu__item"><i class="material-icons mdl-menu__item-icon">train</i>{{ value }}</span></a></li>
         {% endfor %}
       </ul>  
     {% endfor %}
@@ -173,12 +173,12 @@
     event.preventDefault();
     document.getElementById("add_nuke_plus").click();
     });
-    // When user clicks on station from list, capture index and value text
-    $('[id$=_StationList] li').click(function() {  // With ID ending "_StationList"
-    var index = $(this).index();
-    var text = $(this).text().substring(5); // This gets rid of the first 5 chars, which is 'train', called to make the MDL icon
-    alert('Index is: ' + index + ' and text is ' + text);
-    });
+    // When user clicks on station from list, capture index and value text == > UNCOMMENT NEXT 5 LINES TO IMPLEMENT < ==
+    //$('[id$=_StationList] li').click(function() {  // With ID ending "_StationList"
+    //var index = $(this).index();
+    //var text = $(this).text().substring(5); // This gets rid of the first 5 chars, which is 'train', called to make the MDL icon
+    //alert('Index is: ' + index + ' and text is ' + text);
+    //});
     </script>
     
 	</body>

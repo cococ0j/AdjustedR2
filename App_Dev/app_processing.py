@@ -60,10 +60,7 @@ def load_data_chk():
 
 ## ----- BOKEH MAP ----- ##
 def bokeh_magic(df_bus, df_train, df_tram, mode=None, station=None):
-          
-    if not mode: # This is where we do the station processing - otherwise, we show default maps
-        return None,None
-        
+                 
     # Load JSON Gmap style, 
     # https://snazzymaps.com/style/72543/assassins-creed-iv
     # https://snazzymaps.com/style/27725/minimal-v3
@@ -80,8 +77,17 @@ def bokeh_magic(df_bus, df_train, df_tram, mode=None, station=None):
             ("Distance (m)","@shape_dist_traveled{0,0.0}"),
     ]        
 
-    LAT_INIT = -37.818
-    LON_INIT = 144.967
+        
+    if station:
+
+        dt_ll = df_train.loc[(df_train.stop_name == station)]
+        LAT_INIT = dt_ll['stop_lat'].iloc[0]
+        LON_INIT = dt_ll['stop_lon'].iloc[0]
+
+    else:
+
+        LAT_INIT = -37.818
+        LON_INIT = 144.967
     
     MAP_OPTIONS = GMapOptions(lat=LAT_INIT, lng=LON_INIT, map_type="roadmap", zoom=10, scale_control=True, styles=style)
     p = gmap(GOOGLE_KEY, MAP_OPTIONS, title="PTV Network Map", sizing_mode="scale_width"
@@ -120,10 +126,7 @@ def bokeh_magic(df_bus, df_train, df_tram, mode=None, station=None):
     """
 
     p.add_tools(HoverTool(tooltips=TOOLTIPS, mode='mouse'))
-
-    
-    ## ~~~~~ RANDOM EXAMPLE ~~~~~ ##
-    
+   
 #    route_test = df_train.loc[(df_train.route_id == '2-SDM-B-mjp-1') | (df_train.route_id == '2-SDM-B-mjp-1')]
 #    route_test = route_test.to_dict('list')
     
@@ -134,17 +137,34 @@ def bokeh_magic(df_bus, df_train, df_tram, mode=None, station=None):
     # Create DataFrame & Color Dict by mode
     mode_dict =  {'train': (df_train,RCOLOUR_TRAIN), 'tram': (df_tram,RCOLOUR_TRAM), 'bus': (df_bus,RCOLOUR_BUS)}
     
-    dt_choice, COLOUR_CHOICE = mode_dict[mode]
+    
+    ## ~~~~~ SHOW PTV MAPS - MODE ~~~~~ ##
+    if mode:
+    
+        dt_choice, COLOUR_CHOICE = mode_dict[mode]
+            
+        for i, route in enumerate(set(dt_choice.route_id)):
+            droute = dt_choice.loc[(dt_choice.route_id == route)]
+     
+            source = ColumnDataSource(
+                data=droute
+                )
+            
+            p.line(x="stop_lon", y="stop_lat", line_width=2, line_color=COLOUR_CHOICE, line_alpha=0.8, line_cap='round', source=source)
+            p.circle(x="stop_lon", y="stop_lat", size=5, fill_color=COLOUR_CHOICE, fill_alpha=0.6, line_alpha=0.2, source=source)
+
+    ## ~~~~~ PLOT BASED ON SELECTION - STATION ~~~~~ ##
+    else:
+        dt_choice, COLOUR_CHOICE = mode_dict['train']
         
-    for i, route in enumerate(set(dt_choice.route_id)):
-        droute = dt_choice.loc[(dt_choice.route_id == route)]
+        dt_station = dt_choice.loc[(dt_choice.stop_name == station)]
+        dt_route = dt_choice.loc[(dt_choice.route_long_name == dt_station['route_long_name'].iloc[0])]
  
-        source = ColumnDataSource(
-            data=droute
-            )
+        source_station = ColumnDataSource(data=dt_station)
+        source_route = ColumnDataSource(data=dt_route)
         
-        p.line(x="stop_lon", y="stop_lat", line_width=2, line_color=COLOUR_CHOICE, line_alpha=0.8, line_cap='round', source=source)
-        p.circle(x="stop_lon", y="stop_lat", size=5, fill_color=COLOUR_CHOICE, fill_alpha=0.6, line_alpha=0.2, source=source)
+        p.line(x="stop_lon", y="stop_lat", line_width=2, line_color=COLOUR_CHOICE, line_alpha=0.8, line_cap='round', source=source_route)
+        p.circle(x="stop_lon", y="stop_lat", size=5, fill_color=COLOUR_CHOICE, fill_alpha=0.6, line_alpha=0.2, source=source_station)
     
     #            'e:\\Documents\\GitHub\\AdjustedR2\\App_Dev\\TrainFullApp\\static\\img\\PTV\\train.png'
 #    p.image_url(url=['https://bokeh.pydata.org/en/latest/_static/images/logo.png'],x=LON_INIT, y=LAT_INIT, w=24, h=24)  
